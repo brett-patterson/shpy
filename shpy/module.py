@@ -4,6 +4,8 @@ from .command import ShpyCommandWrapper
 
 
 class ShpyModule(ModuleType):
+    """ A module shim that treats unrecognized attributes as command names.
+    """
     def __init__(self, mod):
         self._mod = mod
 

@@ -4,6 +4,8 @@ from six import with_metaclass
 
 
 class ShpyCommandWrapper:
+    """ A callable wrapper for a command.
+    """
     def __init__(self, name):
         self._name = name
 
@@ -12,6 +14,9 @@ class ShpyCommandWrapper:
 
 
 class ShpyCommandBase(with_metaclass(ABCMeta)):
+    """ The base class for a command. Subclasses must implement the execute
+    method.
+    """
     def __init__(self):
         self._executed = False
         self._status = None
@@ -59,6 +64,8 @@ class ShpyCommandBase(with_metaclass(ABCMeta)):
 
 
 class ShpyCommand(ShpyCommandBase):
+    """ A command that executes a single subprocess command.
+    """
     def __init__(self, command):
         super(ShpyCommand, self).__init__()
         self._command = command
@@ -71,6 +78,8 @@ class ShpyCommand(ShpyCommandBase):
 
 
 class ShpyCommandPipe(ShpyCommandBase):
+    """ A command that pipes the output of one command to the input of another.
+    """
     def __init__(self, left, right):
         super(ShpyCommandPipe, self).__init__()
         self.left = left
