@@ -1,6 +1,16 @@
 from types import ModuleType
 
-from .command import ShpyCommandWrapper
+from .command import ShpyCommand
+
+
+class ShpyCommandWrapper:
+    """ A callable wrapper for a command.
+    """
+    def __init__(self, name):
+        self._name = name
+
+    def __call__(self, *args):
+        return ShpyCommand([self._name] + list(args))
 
 
 class ShpyModule(ModuleType):

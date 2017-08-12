@@ -3,14 +3,16 @@ from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 
 
-class ShpyCommandWrapper:
-    """ A callable wrapper for a command.
-    """
-    def __init__(self, name):
-        self._name = name
+class ShpyStatusException(Exception):
+    def __init__(self, command, status, stdout, stderr):
+        super(ShpyStatusException, self).__init__(
+            'Status %d returned from command %s', status, ' '.join(command)
+        )
 
-    def __call__(self, *args):
-        return ShpyCommand([self._name] + list(args))
+        self.command = command
+        self.status = status
+        self.stdout = stdout
+        self.stderr = stderr
 
 
 class ShpyCommandBase(with_metaclass(ABCMeta)):
@@ -73,8 +75,15 @@ class ShpyCommand(ShpyCommandBase):
     def execute(self, stdin=None):
         proc = subprocess.Popen(self._command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate(stdin)
+
         status = proc.returncode
-        return status, stdout, stderr
+        stdout = stdout.strip()
+        stderr = stderr.strip()
+
+        if status != 0:
+            raise ShpyStatusException(self._command, status, stdout, stderr)
+
+        return status, stdout.strip(), stderr.strip()
 
 
 class ShpyCommandPipe(ShpyCommandBase):
@@ -86,8 +95,5 @@ class ShpyCommandPipe(ShpyCommandBase):
         self.right = right
 
     def execute(self, stdin=None):
-        status, stdout, stderr = self.left.execute(stdin)
-        if status != 0:
-            return status, stdout, stderr
-
+        _, stdout, _ = self.left.execute(stdin)
         return self.right.execute(stdout)
