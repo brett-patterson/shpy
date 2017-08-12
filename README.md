@@ -9,5 +9,5 @@ from shpy import echo, grep
 result = echo('hello, world\nhi, world') | grep('hello')
 # No commands have been executed yet. Accessing the status, stdout, or stderr properties
 # on result will trigger the lazy execution.
-str(result) # hello, world\n
+print(result) # hello, world\n
 ```
