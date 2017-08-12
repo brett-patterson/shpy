@@ -31,7 +31,7 @@ class ShpyCommandBase(metaclass=ABCMeta):
 
     @abstractmethod
     def execute(self, stdin=None):
-        return (None, None, None)
+        return None, None, None
 
     def _execute(self):
         if not self._executed:
@@ -62,7 +62,7 @@ class ShpyCommand(ShpyCommandBase):
         proc = subprocess.Popen(self._command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate(stdin)
         status = proc.returncode
-        return (status, stdout, stderr)
+        return status, stdout, stderr
 
 
 class ShpyCommandPipe(ShpyCommandBase):
@@ -73,5 +73,7 @@ class ShpyCommandPipe(ShpyCommandBase):
 
     def execute(self, stdin=None):
         status, stdout, stderr = self.left.execute(stdin)
-        # TODO: Check status here
+        if status != 0:
+            return status, stdout, stderr
+
         return self.right.execute(stdout)
