@@ -1,5 +1,6 @@
 import subprocess
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
 
 class ShpyCommandWrapper:
@@ -10,9 +11,12 @@ class ShpyCommandWrapper:
         return ShpyCommand([self._name] + list(args))
 
 
-class ShpyCommandBase(metaclass=ABCMeta):
+class ShpyCommandBase(with_metaclass(ABCMeta)):
     def __init__(self):
         self._executed = False
+        self._status = None
+        self._stdout = None
+        self._stderr = None
 
     @property
     def status(self):
@@ -36,6 +40,7 @@ class ShpyCommandBase(metaclass=ABCMeta):
     def _execute(self):
         if not self._executed:
             self._status, self._stdout, self._stderr = self.execute()
+            self._executed = True
 
     def __bytes__(self):
         return self.stdout
@@ -48,14 +53,14 @@ class ShpyCommandBase(metaclass=ABCMeta):
 
     def __or__(self, other):
         if not isinstance(other, ShpyCommandBase):
-            raise TypeError(f'Object {other} must be a subclass of ShpyCommandBase')
+            raise TypeError('Object {} must be a subclass of ShpyCommandBase'.format(other))
 
         return ShpyCommandPipe(self, other)
 
 
 class ShpyCommand(ShpyCommandBase):
     def __init__(self, command):
-        super().__init__()
+        super(ShpyCommand, self).__init__()
         self._command = command
 
     def execute(self, stdin=None):
@@ -67,7 +72,7 @@ class ShpyCommand(ShpyCommandBase):
 
 class ShpyCommandPipe(ShpyCommandBase):
     def __init__(self, left, right):
-        super().__init__()
+        super(ShpyCommandPipe, self).__init__()
         self.left = left
         self.right = right
 

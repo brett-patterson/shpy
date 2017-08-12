@@ -1,5 +1,5 @@
 # shpy
-Simplified subprocess execution for Python. Currently only supports Python 3.
+Simplified subprocess execution for Python.
 
 ## Examples
 

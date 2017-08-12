@@ -1,4 +1,5 @@
 import sys
-from .importer import ShpyPathFinder
+from .module import ShpyModule
 
-sys.meta_path.append(ShpyPathFinder())
+mod = sys.modules[__name__]
+sys.modules[__name__] = ShpyModule(mod)
