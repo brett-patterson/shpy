@@ -1,3 +1,6 @@
+import tempfile
+from StringIO import StringIO
+
 from .base_test import BaseTest
 
 class TestCommand(BaseTest):
@@ -42,3 +45,26 @@ class TestCommand(BaseTest):
             self.assertEqual('', exc.stderr)
         else:
             self.fail('Status exception not thrown')
+
+    def test_command_redirect(self):
+        from shpy import echo
+
+        s = StringIO()
+        echo('testing') > s
+        s.seek(0)
+        self.assertEqual('testing', s.read())
+
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            echo('testing') > tmp_file.name
+            tmp_file.seek(0)
+            self.assertEqual('testing', tmp_file.read())
+
+    def test_command_redirect_fail(self):
+        from shpy import echo
+
+        try:
+            echo('foo') > 0
+        except TypeError:
+            pass
+        else:
+            self.fail('Type error not thrown')

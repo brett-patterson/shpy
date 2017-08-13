@@ -61,8 +61,10 @@ class ShpyCommandBase(with_metaclass(ABCMeta)):
     def __or__(self, other):
         if not isinstance(other, ShpyCommandBase):
             raise TypeError('Object {} must be a subclass of ShpyCommandBase'.format(other))
-
         return ShpyCommandPipe(self, other)
+
+    def __gt__(self, to):
+        return ShpyCommandRedirect(self, to)
 
 
 class ShpyCommand(ShpyCommandBase):
@@ -97,3 +99,28 @@ class ShpyCommandPipe(ShpyCommandBase):
     def execute(self, stdin=None):
         _, stdout, _ = self.left.execute(stdin)
         return self.right.execute(stdout)
+
+
+class ShpyCommandRedirect(ShpyCommandBase):
+    """ A command that redirects the output of one command to a file.
+    """
+    def __init__(self, command, to):
+        super(ShpyCommandRedirect, self).__init__()
+        self.command = command
+        self.to = to
+
+        # Evaluate the command immediately
+        self.execute()
+
+    def execute(self, stdin=None):
+        _, stdout, _ = self.command.execute(stdin)
+        if hasattr(self.to, 'write'):
+            # File-like object
+            self.to.write(stdout)
+        elif isinstance(self.to, str) or isinstance(self.to, bytes):
+            with open(self.to, 'wb') as f:
+                f.write(stdout)
+        else:
+            raise TypeError('Invalid redirection destination: {}'.format(self.to))
+
+        return 0, '', ''
