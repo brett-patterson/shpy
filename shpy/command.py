@@ -6,7 +6,7 @@ from six import with_metaclass
 class ShpyStatusException(Exception):
     def __init__(self, command, status, stdout, stderr):
         super(ShpyStatusException, self).__init__(
-            'Status %d returned from command %s', status, ' '.join(command)
+            'Status %d returned from command \'%s\'' % (status, ' '.join(command))
         )
 
         self.command = command
@@ -70,9 +70,10 @@ class ShpyCommandBase(with_metaclass(ABCMeta)):
 class ShpyCommand(ShpyCommandBase):
     """ A command that executes a single subprocess command.
     """
-    def __init__(self, command):
+    def __init__(self, command, throw=True):
         super(ShpyCommand, self).__init__()
         self._command = command
+        self._throw = throw
 
     def execute(self, stdin=None):
         proc = subprocess.Popen(self._command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -82,7 +83,7 @@ class ShpyCommand(ShpyCommandBase):
         stdout = stdout.strip()
         stderr = stderr.strip()
 
-        if status != 0:
+        if status != 0 and self._throw:
             raise ShpyStatusException(self._command, status, stdout, stderr)
 
         return status, stdout.strip(), stderr.strip()
@@ -123,4 +124,4 @@ class ShpyCommandRedirect(ShpyCommandBase):
         else:
             raise TypeError('Invalid redirection destination: {}'.format(self.dest))
 
-        return 0, '', ''
+        return 0, b'', b''

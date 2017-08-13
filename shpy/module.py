@@ -9,8 +9,8 @@ class ShpyCommandWrapper:
     def __init__(self, name):
         self._name = name
 
-    def __call__(self, *args):
-        return ShpyCommand([self._name] + list(args))
+    def __call__(self, *args, **kwargs):
+        return ShpyCommand([self._name] + list(args), **kwargs)
 
 
 class ShpyModule(ModuleType):
