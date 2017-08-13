@@ -34,6 +34,16 @@ class TestCommand(BaseTest):
         self.assertEqual('hello, world', result.stdout)
         self.assertEqual('', result.stderr)
 
+    def test_command_pipe_fail(self):
+        from shpy import echo
+
+        try:
+            echo('test') | []
+        except TypeError:
+            pass
+        else:
+            self.fail('Type error not thrown')
+
     def test_command_pipe_fail_early(self):
         from shpy import test, grep, ShpyStatusException
 
